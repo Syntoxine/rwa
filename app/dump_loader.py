@@ -17,10 +17,13 @@ logger = logging.getLogger(__name__)
 BATCH_SIZE = 8192
 
 DATA_URL = "https://nationstates.net/pages/nations.xml.gz"
-UA = os.getenv("NS_USER_AGENT", "Real-time World Assembly/0.0.1 (flavien@dussud.org)")
+UA = os.getenv("NS_USER_AGENT")
 
-SUPABASE_URL = os.getenv("SUPABASE_URL", "https://gxweofpinajrcfbxkukp.supabase.co")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "sb_secret_UpK1Bdr7n1m73jYUEISwVQ_JKBRoLif") # HAHA I COMMITED A SECRET KEY. FML
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+if SUPABASE_URL is None or SUPABASE_KEY is None:
+    raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set in environment variables.")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -107,7 +110,7 @@ def main():
             logger.info(f"Batch {i}/{len(nations) // BATCH_SIZE + 1}")
             response = (
                 supabase.table("nations")
-                .upsert(batch, returning=ReturnMethod.minimal)
+                .upsert(batch, returning=ReturnMethod.minimal) # type: ignore (batch is a tuple which is fine, but list is expected)
                 .execute()
             )
         logger.info(
