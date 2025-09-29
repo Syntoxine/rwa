@@ -20,7 +20,7 @@ DATA_URL = "https://nationstates.net/pages/nations.xml.gz"
 UA = os.getenv("NS_USER_AGENT", "Real-time World Assembly/0.0.1 (flavien@dussud.org)")
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://gxweofpinajrcfbxkukp.supabase.co")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "sb_secret_UpK1Bdr7n1m73jYUEISwVQ_JKBRoLif")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY", "sb_secret_UpK1Bdr7n1m73jYUEISwVQ_JKBRoLif") # HAHA I COMMITED A SECRET KEY. FML
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
