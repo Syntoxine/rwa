@@ -114,8 +114,8 @@ class NSEvent:
                     ).execute()
 
                 case EventType.FOUNDING | EventType.FOUNDING_REFOUND:
-                    supabase.table("nations").insert(
-                        {"name": self.nation, "region": self.parameters[0]}
+                    supabase.table("nations").upsert(
+                        {"name": self.nation, "region": self.parameters[0], "active": True}
                     ).execute()
 
                 case EventType.MEMBER_APPLY:
