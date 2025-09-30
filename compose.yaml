@@ -1,0 +1,30 @@
+name: rwa
+services:
+  ingester:
+    env_file: .env
+    build:
+      context: ingester
+    develop:
+      watch:
+        - action: sync
+          path: ingester/
+          target: /app
+          ignore:
+            - .venv/
+        - action: rebuild
+          path: ./uv.lock
+
+  consumer:
+    env_file: .env
+    build:
+      context: consumer
+    restart: always
+    develop:
+      watch:
+        - action: sync
+          path: consumer/
+          target: /app
+          ignore:
+            - .venv/
+        - action: rebuild
+          path: ./uv.lock

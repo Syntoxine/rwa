@@ -12,18 +12,21 @@ from supabase import Client, create_client
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
+logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 8192
 
 DATA_URL = "https://nationstates.net/pages/nations.xml.gz"
-UA = os.getenv("NS_USER_AGENT")
+USER_AGENT = os.getenv("NS_USER_AGENT")
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 if SUPABASE_URL is None or SUPABASE_KEY is None:
-    raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set in environment variables.")
+    raise ValueError(
+        "SUPABASE_URL and SUPABASE_KEY must be set in environment variables."
+    )
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -39,7 +42,7 @@ def main():
     start_time = time.time()
     logger.info("Downloading dump...")
 
-    response = requests.get(DATA_URL, headers={"User-Agent": UA}, stream=True)
+    response = requests.get(DATA_URL, headers={"User-Agent": USER_AGENT}, stream=True)
     response.raise_for_status()
 
     with open("nations_temp.xml.gz", "wb") as f:
@@ -85,9 +88,15 @@ def main():
                     "FLAG",
                 ]:
                     if elem.tag == "UNSTATUS":
-                        current_nation["wa_member"] = (
-                            True if elem.text == "WA Member" else False
-                        )
+                        match elem.text:
+                            case "WA Delegate":
+                                current_nation["wa_delegate"] = True
+                                current_nation["wa_member"] = True
+                            case "WA Member":
+                                current_nation["wa_member"] = True
+                            case _:
+                                current_nation["wa_delegate"] = False
+                                current_nation["wa_member"] = False
                     elif elem.tag == "ENDORSEMENTS":
                         current_nation["endorsements"] = (
                             list(map(to_snake_case, elem.text.split(",")))
@@ -110,7 +119,7 @@ def main():
             logger.info(f"Batch {i}/{len(nations) // BATCH_SIZE + 1}")
             response = (
                 supabase.table("nations")
-                .upsert(batch, returning=ReturnMethod.minimal) # type: ignore (batch is a tuple which is fine, but list is expected)
+                .upsert(batch, returning=ReturnMethod.minimal)  # type: ignore (batch is a tuple which is fine, but list is expected)
                 .execute()
             )
         logger.info(
