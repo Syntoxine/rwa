@@ -6,7 +6,7 @@ This tool uses the NationStates SSE API to construct a realtime snapshot of curr
 - Ability to post events from any of these buckets to 1 or more discord webhooks.
 ## Guide
 ### Setup
-The background db used is hosted by Supabase. I have encountered many issues with postgres and have tried to not use it, but any one willing to fix my code is welcome. As such, you will need to create a Supabase project to use this.
+The background db used is hosted by Supabase. I have encountered many issues with postgres and have tried to use it, but have failed this far. As such, you will need to create a Supabase project to use this.
 The followings environment variables must be defined. To do this, create a `.env` file in the same directory as the `compose.yaml` file containing the following variables:
 | *Variable*      | *Description*                                                                   |
 | --------------- | ------------------------------------------------------------------------------- |
@@ -16,7 +16,7 @@ The followings environment variables must be defined. To do this, create a `.env
 | `UPDATE_DB`     | Either `"true"` or `"false"`, whether events should update the database or not. |
 
 To get the consumer running, run `docker compose up -d consumer`. To populate your database, you can ingest the daily dump, which updates at around 5:30 AM UTC each day, with `docker compose up ingester`.
-### Webhooks
+### Discord Webhooks
 To configure channels to which to post events to, create a `channels.toml` file.
 ```toml
 [Example]
