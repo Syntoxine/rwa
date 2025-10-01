@@ -97,3 +97,14 @@ def get_region(nation: str) -> str | None:
             return nation_query.data[0]["region"]
     except Exception as e:
         logger.error(f"Error fetching region for nation {nation}: {e}")
+
+def get_wa_status(nation: str) -> bool | None:
+    try:
+        nation_query = (
+            supabase.table("nations").select("wa_member").eq("name", nation).execute()
+        )
+        if nation_query.data:
+            return nation_query.data[0]["wa_member"]
+    except Exception as e:
+        logger.error(f"Error fetching WA status for nation {nation}: {e}")
+        return False

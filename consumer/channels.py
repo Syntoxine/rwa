@@ -10,11 +10,12 @@ USERNAME = "RWA Feed"
 AVATAR_URL = "https://files.dussud.org/NovaAohr/2560w1x1.png"
 
 class Channel:
-    def __init__(self, name: str, webhook_url: str, regions=None, buckets=None):
+    def __init__(self, name: str, webhook_url: str, endotarting: bool = False, regions=None, buckets=None):
         self.name = name
         self.url = webhook_url
-        self.regions = regions if regions is not None else []
-        self.buckets = buckets if buckets is not None else []
+        self.endotarting = endotarting
+        self.regions: list[str] = regions if regions is not None else []
+        self.buckets: list[str] = buckets if buckets is not None else []
 
     @staticmethod
     def read_config() -> list['Channel']:
@@ -30,8 +31,9 @@ class Channel:
                 Channel(
                     name=name,
                     webhook_url=settings.get("webhook_url"),
-                    regions=settings.get("regions", []),
-                    buckets=settings.get("buckets", []),
+                    endotarting=settings.get("endotarting", False),
+                    regions=settings.get("regions", None),
+                    buckets=settings.get("buckets", None),
                 )
             )
         return channels

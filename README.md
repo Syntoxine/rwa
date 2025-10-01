@@ -24,7 +24,13 @@ name = "Example Channel"
 webhook_url = "https://discord.com/api/webhooks/<number>/<token>"
 regions = ["the_south_pacific"]
 buckets = ["move", "founding", "cte", "member", "endo"]
+
+[Example 2]
+name = "Example Endotarting Channel"
+webhook_url = "https://discord.com/api/webhooks/<number>/<token>"
+endotarting = true
+regions = ["the_south_pacific"]
 ```
-You can add as many different channels as you like, the only required property is the `webhook_url`. The `regions` and `buckets` function as filters, only events from a region in `regions` or a bucket in `buckets` will be sent to the channel.
+You can add as many different channels as you like, the only required property is the `webhook_url`. The `regions` and `buckets` function as filters, only events from a region in `regions` or a bucket in `buckets` will be sent to the channel. Adding the `endotarting=true` property will make the channel an endotarting channel, where only events that result in there being someone new to endorse will be shown.
 ## TODO
 - Implement personalized db queries through a discord bot
