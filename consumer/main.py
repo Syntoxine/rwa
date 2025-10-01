@@ -10,7 +10,7 @@ from sse_consumer import consume
 UPDATE_DB = os.getenv("UPDATE_DB", "true").lower() == "true"
 
 logging.basicConfig(
-    filename=f"../logs/consumer-{datetime.now().isoformat()}.log",
+    filename=f"../logs/consumer-{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}.log",
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -26,7 +26,7 @@ async def main():
         for channel in channels:
             bucket = event.event_type.get_bucket()
             region = db.get_region(event.nation)
-            if bucket in channel.buckets and region in channel.regional_filter:
+            if (bucket in channel.buckets or not channel.buckets) and (region in channel.regions or not channel.regions):
                 await channel.send(str(event))
 
 

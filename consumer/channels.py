@@ -10,10 +10,10 @@ USERNAME = "RWA Feed"
 AVATAR_URL = "https://files.dussud.org/NovaAohr/2560w1x1.png"
 
 class Channel:
-    def __init__(self, name: str, webhook_url: str, regional_filter=None, buckets=None):
+    def __init__(self, name: str, webhook_url: str, regions=None, buckets=None):
         self.name = name
         self.url = webhook_url
-        self.regional_filter = regional_filter if regional_filter is not None else []
+        self.regions = regions if regions is not None else []
         self.buckets = buckets if buckets is not None else []
 
     @staticmethod
@@ -30,7 +30,7 @@ class Channel:
                 Channel(
                     name=name,
                     webhook_url=settings.get("webhook_url"),
-                    regional_filter=settings.get("regional_filter", []),
+                    regions=settings.get("regional_filter", []),
                     buckets=settings.get("buckets", []),
                 )
             )

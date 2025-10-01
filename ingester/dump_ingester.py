@@ -11,7 +11,7 @@ from postgrest import ReturnMethod
 from supabase import Client, create_client
 
 logging.basicConfig(
-    filename=f"../logs/ingester-{datetime.now().isoformat()}.log",
+    filename=f"../logs/ingester-{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}.log",
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 logging.getLogger("httpx").setLevel(logging.WARNING)
