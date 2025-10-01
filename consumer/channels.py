@@ -30,7 +30,7 @@ class Channel:
                 Channel(
                     name=name,
                     webhook_url=settings.get("webhook_url"),
-                    regions=settings.get("regional_filter", []),
+                    regions=settings.get("regions", []),
                     buckets=settings.get("buckets", []),
                 )
             )
