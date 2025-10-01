@@ -62,6 +62,11 @@ class NSEvent:
     def __str__(self) -> str:
         parts = self.str.split()
         parts[0] = f"[{self.nation.title().replace('_', ' ')}](https://nationstates.net/nation={self.nation})"
+        match self.event_type:
+            case EventType.MOVE | EventType.FOUNDING | EventType.FOUNDING_REFOUND | EventType.CTE:
+                other_type = "region"
+            case _:
+                other_type = "nation"
         for i, param in zip(PARAMETER_POSITIONS.get(self.event_type, ()), self.parameters):
-            parts[i] = f"[{param.title().replace('_', ' ')}](https://nationstates.net/nation={param})"
+            parts[i] = f"[{param.title().replace('_', ' ')}](https://nationstates.net/{other_type}={param})"
         return " ".join(parts)
