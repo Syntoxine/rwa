@@ -61,7 +61,7 @@ class NSEvent:
     
     def __str__(self) -> str:
         parts = self.str.split()
-        parts[0] = f"[{self.nation}](https://nationstates.net/nation={self.nation})"
+        parts[0] = f"[{self.nation.title().replace('_', ' ')}](https://nationstates.net/nation={self.nation})"
         for i, param in zip(PARAMETER_POSITIONS.get(self.event_type, ()), self.parameters):
-            parts[i] = f"[{param}](https://nationstates.net/nation={param})"
+            parts[i] = f"[{param.title().replace('_', ' ')}](https://nationstates.net/nation={param})"
         return " ".join(parts)

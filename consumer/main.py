@@ -18,7 +18,7 @@ logging.getLogger("sse_consumer").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 channels = get_channels()
-logger.info(f"Loaded {len(channels)} channels from config: {[channel.name for channel in channels]}")
+logger.info(f"Loaded {len(channels)} channel{'s' if len(channels) > 1 else ''} from config: {[channel.name for channel in channels]}")
 
 async def main():
     logger.info("Listening for events...")
