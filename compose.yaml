@@ -19,8 +19,8 @@ services:
         source: ./logs
         target: /logs
       - type: bind
-        source: ./channels.conf
-        target: /app/channels.conf
+        source: ./channels.toml
+        target: /app/channels.toml
 
   bot:
     env_file: .env

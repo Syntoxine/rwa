@@ -18,7 +18,7 @@ class Channel:
 
     @staticmethod
     def read_config() -> list['Channel']:
-        with open("channels.conf", "rb") as f:
+        with open("channels.toml", "rb") as f:
             config = tomllib.load(f)
         channels = []
         for channel, settings in config.items():
