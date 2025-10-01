@@ -4,52 +4,27 @@ services:
     env_file: .env
     build:
       context: ingester
-    develop:
-      watch:
-        - action: sync
-          path: ingester/
-          target: /app
-          ignore:
-            - .venv/
-        - action: rebuild
-          path: ./uv.lock
     volumes:
-      - logs:/logs
+      - type: bind
+        source: ./logs
+        target: /logs
 
   consumer:
     env_file: .env
     build:
       context: consumer
     restart: unless-stopped
-    develop:
-      watch:
-        - action: sync
-          path: consumer/
-          target: /app
-          ignore:
-            - .venv/
-        - action: rebuild
-          path: ./uv.lock
     volumes:
-      - logs:/logs
+      - type: bind
+        source: ./logs
+        target: /logs
 
   bot:
     env_file: .env
     build:
       context: bot
     restart: unless-stopped
-    develop:
-      watch:
-        - action: sync
-          path: bot/
-          target: /app
-          ignore:
-            - .venv/
-        - action: rebuild
-          path: ./uv.lock
     volumes:
-      - logs:/logs
-
-volumes:
-  logs:
-    driver: local
+      - type: bind
+        source: ./logs
+        target: /logs
