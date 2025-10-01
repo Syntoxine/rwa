@@ -1,9 +1,11 @@
 [project]
 name = "consumer"
 version = "0.1.0"
-description = "Utility that consumes events from the NationStates SSE feed and updates a Supabase database accordingly."
+description = "Utility that consumes events from the NationStates SSE feed and updates a Supabase database accordingly, as well as sending notifications to configured Discord webhooks."
 requires-python = ">=3.13"
 dependencies = [
+    "aiohttp>=3.12.15",
+    "discord-py>=2.6.3",
     "launchdarkly-eventsource>=1.3.0",
     "supabase>=2.20.0",
 ]

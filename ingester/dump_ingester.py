@@ -19,6 +19,11 @@ logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 8192
 
+UPDATE_DB = os.getenv("UPDATE_DB", "true").lower() == "true"
+if not UPDATE_DB:
+    logger.info("UPDATE_DB is set to false, exiting.")
+    exit(0)
+
 DATA_URL = "https://nationstates.net/pages/nations.xml.gz"
 USER_AGENT = os.getenv("NS_USER_AGENT")
 

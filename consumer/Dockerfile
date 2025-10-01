@@ -4,4 +4,4 @@ ADD . /app
 WORKDIR /app
 RUN uv sync --locked
 
-CMD ["uv", "run", "sse_consumer.py"]
+CMD ["uv", "run", "main.py"]
