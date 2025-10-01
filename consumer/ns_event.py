@@ -48,6 +48,7 @@ PARAMETER_POSITIONS: dict[EventType, tuple[int, ...]] = {
 
 class NSEvent:
     def __init__(self, event_str: str):
+        self.str = event_str
         parts = event_str.split()
         self.nation = parts[0][2:-2]
         self.event_type = EventType.event_type_from_str(event_str)
@@ -57,3 +58,10 @@ class NSEvent:
 
     def __repr__(self) -> str:
         return f"<NSEvent nation='{self.nation}' event_type={self.event_type}{f' parameters={self.parameters}' if self.parameters else ''}>"
+    
+    def __str__(self) -> str:
+        parts = self.str.split()
+        parts[0] = f"[{self.nation}](https://nationstates.net/nation={self.nation})"
+        for i, param in zip(PARAMETER_POSITIONS.get(self.event_type, ()), self.parameters):
+            parts[i] = f"[{param}](https://nationstates.net/nation={param})"
+        return " ".join(parts)
