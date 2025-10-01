@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from datetime import datetime
 from enum import Enum
 
 from ld_eventsource import SSEClient
@@ -8,6 +9,7 @@ from ld_eventsource.config import ConnectStrategy
 from supabase import Client, create_client
 
 logging.basicConfig(
+    filename=f"../logs/consumer-{datetime.now().isoformat()}.log",
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 logging.getLogger("httpx").setLevel(logging.WARNING)
