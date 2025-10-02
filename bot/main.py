@@ -76,6 +76,7 @@ async def on_ready():
 @app_commands.describe(nation="The name of your nation")
 async def tart(interaction: discord.Interaction, nation: str):
     """Use this command to get a list of nations your nation can endorse in your region."""
+    await interaction.response.defer()
     
     nation = to_snake_case(nation)
     if not db.get_wa_status(nation):
