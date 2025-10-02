@@ -1,5 +1,6 @@
 import gzip
 import logging
+import logging.handlers
 import os
 import time
 import xml.etree.ElementTree as ET
@@ -10,12 +11,23 @@ import requests
 from postgrest import ReturnMethod
 from supabase import Client, create_client
 
-logging.basicConfig(
-    filename=f"../logs/ingester-{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}.log",
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
+fmt = '[{asctime}] [{levelname:^8}] {name} - {message}'
+dt_fmt = '%Y-%m-%d %H:%M:%S'
+logging.basicConfig(format=fmt, datefmt=dt_fmt, style='{', level=logging.INFO)
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
+
+handler = logging.handlers.RotatingFileHandler(
+    filename='../logs/ingester.log',
+    encoding='utf-8',
+    maxBytes=32 * 1024 * 1024,  # 32 MiB
+    backupCount=5,  # Rotate through 5 files
+)
+
+dt_fmt = '%Y-%m-%d %H:%M:%S'
+formatter = logging.Formatter(fmt, dt_fmt, style='{')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 BATCH_SIZE = 8192
 

@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import logging.handlers
 import os
 from datetime import datetime
 
@@ -10,14 +11,23 @@ from sse_consumer import consume
 
 UPDATE_DB = os.getenv("UPDATE_DB", "true").lower() == "true"
 
-logging.basicConfig(
-    filename=f"../logs/consumer-{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}.log",
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO,
-)
+fmt = '[{asctime}] [{levelname:^8}] {name} - {message}'
+dt_fmt = '%Y-%m-%d %H:%M:%S'
+logging.basicConfig(format=fmt, datefmt=dt_fmt, style='{', level=logging.INFO)
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("sse_consumer").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
+
+handler = logging.handlers.RotatingFileHandler(
+    filename='../logs/consumer.log',
+    encoding='utf-8',
+    maxBytes=32 * 1024 * 1024,  # 32 MiB
+    backupCount=5,  # Rotate through 5 files
+)
+
+formatter = logging.Formatter(fmt, dt_fmt, style='{')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 channels = get_channels()
 logger.info(
@@ -37,10 +47,7 @@ async def main():
                     if (
                         event.event_type == EventType.MOVE
                         and not db.get_wa_status(event.nation)
-                    ) or event.event_type not in {
-                        EventType.ENDO,
-                        EventType.MEMBER_ADMIT,
-                    }:
+                    ) or event.event_type != EventType.MEMBER_ADMIT:
                         continue
                     await channel.send(str(event))
                 elif bucket in channel.buckets or not channel.buckets:
