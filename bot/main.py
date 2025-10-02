@@ -5,6 +5,7 @@ import os
 import discord
 from discord import app_commands
 from discord.ext import commands
+from discord.interactions import InteractionMessage
 
 import db
 
@@ -76,22 +77,33 @@ async def on_ready():
 @app_commands.describe(nation="The name of your nation")
 async def tart(interaction: discord.Interaction, nation: str):
     """Use this command to get a list of nations your nation can endorse in your region."""
-    await interaction.response.defer()
+    callback_response = await interaction.response.defer()
+    if callback_response is not None:
+        interaction_message: InteractionMessage = callback_response.resource # type: ignore
+    else:
+        return
     
     nation = to_snake_case(nation)
     if not db.get_wa_status(nation):
-        await interaction.response.send_message(
-            f"{to_title_case(nation)} is not a WA member, and can't endorse anyone!"
+        await interaction_message.edit(
+            content=f"{to_title_case(nation)} is not a WA member, and can't endorse anyone!"
         )
         return
+    
     endorsable_nations = db.get_endorsable_nations(nation)
     if not endorsable_nations:
-        await interaction.response.send_message(
-            f"{to_title_case(nation)} has endorsed everyone it could in its region!"
+        await interaction_message.edit(
+            content=f"{to_title_case(nation)} has endorsed everyone it could in its region!"
         )
     else:
-        await interaction.response.send_message(
-            f"{to_title_case(nation)} has not endorsed the following nations: {', '.join(get_md_nation_link(n) for n in endorsable_nations)}"
+        nations = [get_md_nation_link(n) for n in endorsable_nations]
+        prefix = f"{to_title_case(nation)} has not endorsed the following nations:"
+        if len(nations) > 12:
+            content = f"{prefix} {', '.join(nations[:12])}, and {len(nations) - 12} more nations ommitted for brevity."
+        else:
+            content = f"{prefix} {', '.join(nations)}."
+        await interaction_message.edit(
+            content=content
         )
 
 
