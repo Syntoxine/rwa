@@ -18,7 +18,7 @@ handler = logging.handlers.RotatingFileHandler(
 
 dt_fmt = "%Y-%m-%d %H:%M:%S"
 formatter = logging.Formatter(
-    "[{asctime}] [{levelname:>8}] {name} - {message}", dt_fmt, style="{"
+    "[{asctime}] [{levelname:<8}] {name} - {message}", dt_fmt, style="{"
 )
 handler.setFormatter(formatter)
 logger.addHandler(handler)

@@ -11,7 +11,7 @@ from sse_consumer import consume
 
 UPDATE_DB = os.getenv("UPDATE_DB", "true").lower() == "true"
 
-fmt = "[{asctime}] [{levelname:^8}] {name} - {message}"
+fmt = "[{asctime}] [{levelname:<8}] {name} - {message}"
 dt_fmt = "%Y-%m-%d %H:%M:%S"
 logging.basicConfig(format=fmt, datefmt=dt_fmt, style="{", level=logging.INFO)
 logging.getLogger("httpx").setLevel(logging.WARNING)
