@@ -2,7 +2,6 @@ import asyncio
 import logging
 import logging.handlers
 import os
-from datetime import datetime
 
 import db
 from ns_event import EventType

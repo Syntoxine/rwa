@@ -1,5 +1,21 @@
 name: rwa
 services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      retries: 5
+  
   ingester:
     env_file: .env
     build:
@@ -8,6 +24,9 @@ services:
       - type: bind
         source: ./logs
         target: /logs
+    depends_on:
+      db:
+        condition: service_healthy
 
   consumer:
     env_file: .env
@@ -21,6 +40,9 @@ services:
       - type: bind
         source: ./channels.toml
         target: /app/channels.toml
+    depends_on:
+      db:
+        condition: service_healthy
 
   bot:
     env_file: .env
@@ -31,3 +53,9 @@ services:
       - type: bind
         source: ./logs
         target: /logs
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
