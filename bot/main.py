@@ -96,7 +96,7 @@ async def tart(interaction: discord.Interaction, nation: str):
             content=f"{to_title_case(nation)} has endorsed everyone it could in its region!"
         )
     else:
-        nations = [get_md_nation_link(n) for n in endorsable_nations]
+        nations = [f"{get_md_nation_link(n)}#composebutton" for n in endorsable_nations]
         prefix = f"{to_title_case(nation)} has not endorsed the following nations:"
         if len(nations) > 12:
             content = f"{prefix} {', '.join(nations[:12])}, and {len(nations) - 12} more nations ommitted for brevity."

@@ -4,6 +4,7 @@ This tool uses the NationStates SSE API to construct a realtime snapshot of curr
 - Daily dump ingestion
 - Accurately tracks the following buckets from the happenings api: `move`, `founding`, `cte`, `member`, `endo`
 - Ability to post events from any of these buckets to 1 or more discord webhooks.
+- Discord bot, with endotarting functionality (`/tart nation: <name>`)
 ## Guide
 ### Setup
 The followings environment variables must be defined. To do this, create a `.env` file in the same directory as the `compose.yaml` file containing the following variables:
