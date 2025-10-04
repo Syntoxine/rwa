@@ -33,12 +33,12 @@ def to_title_case(name: str) -> str:
     return name.title().replace("_", " ")
 
 
-def get_md_nation_link(name: str) -> str:
-    return f"[{to_title_case(name)}](https://nationstates.net/nation={to_snake_case(name)})"
+def get_md_nation_link(name: str, suffix: str) -> str:
+    return f"[{to_title_case(name)}](https://nationstates.net/nation={to_snake_case(name)}{suffix})"
 
 
-def get_md_region_link(name: str) -> str:
-    return f"[{to_title_case(name)}](https://nationstates.net/region={to_snake_case(name)})"
+def get_md_region_link(name: str, suffix: str) -> str:
+    return f"[{to_title_case(name)}](https://nationstates.net/region={to_snake_case(name)}{suffix})"
 
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN", None)
@@ -98,10 +98,10 @@ async def tart(interaction: discord.Interaction, nation: str):
             content=f"{to_title_case(nation)} has endorsed everyone it could in its region!"
         )
     else:
-        nations = [f"{get_md_nation_link(n)}#composebutton" for n in endorsable_nations]
+        nations = [f"{get_md_nation_link(n, '#composebutton')}" for n in endorsable_nations]
         prefix = f"{to_title_case(nation)} has not endorsed the following nations:"
-        if len(nations) > 12:
-            content = f"{prefix} {', '.join(nations[:12])}, and {len(nations) - 12} more nations ommitted for brevity."
+        if len(nations) > 16:
+            content = f"{prefix} {', '.join(nations[:16])}, and {len(nations) - 16} more nations ommitted for brevity."
         else:
             content = f"{prefix} {', '.join(nations)}."
         await interaction_message.edit(
