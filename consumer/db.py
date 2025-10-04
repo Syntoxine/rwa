@@ -30,7 +30,8 @@ def event_update(event: NSEvent) -> None:
                 case EventType.ENDO:
                     endorsements.append(event.nation)
                 case EventType.ENDO_WITHDRAW:
-                    endorsements.remove(event.nation)
+                    if event.nation in endorsements:
+                        endorsements.remove(event.nation)
 
             with psycopg.connect(**DB_CONFIG) as conn:
                 with conn.cursor() as cur:

@@ -4,11 +4,9 @@ import logging.handlers
 import os
 
 import db
-from ns_event import EventType
-from channels import get_channels
+from ns_event import NSEvent, EventType
+from channels import Channel, get_channels
 from sse_consumer import consume
-
-UPDATE_DB = os.getenv("UPDATE_DB", "true").lower() == "true"
 
 fmt = "[{asctime}] [{levelname:<8}] {name} - {message}"
 dt_fmt = "%Y-%m-%d %H:%M:%S"
@@ -34,33 +32,32 @@ logger.info(
 )
 
 
+def match(event: NSEvent, channel: Channel) -> bool:
+    bucket = event.event_type.get_bucket()
+    region = db.get_region(event.nation)
+    region2 = event.parameters[0] if event.event_type == EventType.MOVE else None
+    if region in channel.regions or region2 in channel.regions or not channel.regions:
+        if channel.endotarting:
+            if (
+                (
+                    event.event_type == EventType.MOVE
+                    and not db.get_wa_status(event.nation)
+                )
+                or event.event_type != EventType.MEMBER_ADMIT
+                or region not in channel.regions
+            ):
+                return False
+            return True
+        elif bucket in channel.buckets or not channel.buckets:
+            return True
+    return False
+
+
 async def main():
     logger.info("Listening for events...")
-    for event in consume(update_db=UPDATE_DB):
-        for channel in channels:
-            bucket = event.event_type.get_bucket()
-            region = db.get_region(event.nation)
-            region2 = (
-                event.parameters[0] if event.event_type == EventType.MOVE else None
-            )
-            if (
-                region in channel.regions
-                or region2 in channel.regions
-                or not channel.regions
-            ):
-                if channel.endotarting:
-                    if (
-                        (
-                            event.event_type == EventType.MOVE
-                            and not db.get_wa_status(event.nation)
-                        )
-                        or event.event_type != EventType.MEMBER_ADMIT
-                        or region not in channel.regions
-                    ):
-                        continue
-                    await channel.send(str(event))
-                elif bucket in channel.buckets or not channel.buckets:
-                    await channel.send(str(event))
+    for event in consume():
+        for channel in filter(lambda c: c.match(event), channels):
+            await channel.send(str(event))
 
 
 if __name__ == "__main__":

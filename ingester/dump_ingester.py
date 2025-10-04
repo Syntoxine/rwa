@@ -27,11 +27,6 @@ formatter = logging.Formatter(fmt, dt_fmt, style="{")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-UPDATE_DB = os.getenv("UPDATE_DB", "true").lower() == "true"
-if not UPDATE_DB:
-    logger.info("UPDATE_DB is set to false, exiting.")
-    exit(0)
-
 DATA_URL = "https://nationstates.net/pages/nations.xml.gz"
 USER_AGENT = os.getenv("NS_USER_AGENT")
 

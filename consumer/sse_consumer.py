@@ -15,7 +15,7 @@ API_URL = "https://www.nationstates.net/api/move+founding+cte+member+endo"
 USER_AGENT = os.getenv("NS_USER_AGENT")
 
 
-def consume(update_db: bool = False) -> Generator[NSEvent]:
+def consume() -> Generator[NSEvent]:
     sse_client = SSEClient(
         connect=ConnectStrategy.http(url=API_URL, headers={"User-Agent": USER_AGENT})
     )
@@ -23,7 +23,6 @@ def consume(update_db: bool = False) -> Generator[NSEvent]:
     for event in sse_client.events:
         ns_event = NSEvent(json.loads(event.data)["str"])
         logger.info(ns_event)
-        if update_db:
-            db.event_update(ns_event)
+        db.event_update(ns_event)
 
         yield ns_event
