@@ -55,13 +55,15 @@ For inquiries, message @syntoxine
 intents = discord.Intents.default()
 intents.message_content = True
 
-MY_GUILD = discord.Object(1033103537271488542)
+MY_GUILD = discord.Object(int(os.getenv("DEV_GUILD", 0)))
 
 
 class Arwa(commands.Bot):
     async def setup_hook(self):
-        self.tree.copy_global_to(guild=MY_GUILD)
-        await self.tree.sync(guild=MY_GUILD)
+        # Sync the command tree with the guild if in dev mode, else globally
+        if MY_GUILD.id != 0:
+            self.tree.copy_global_to(guild=MY_GUILD)
+            await self.tree.sync(guild=MY_GUILD)
 
 
 arwa = Arwa(command_prefix=":", intents=intents, description=description)
