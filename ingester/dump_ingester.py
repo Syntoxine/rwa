@@ -6,7 +6,7 @@ import time
 from datetime import datetime, timezone
 import xml.etree.ElementTree as ET
 
-import requests
+import sans
 import psycopg
 
 fmt = "[{asctime}] [{levelname:<8}] {name} - {message}"
@@ -27,8 +27,10 @@ formatter = logging.Formatter(fmt, dt_fmt, style="{")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-DATA_URL = "https://nationstates.net/pages/nations.xml.gz"
 USER_AGENT = os.getenv("NS_USER_AGENT")
+
+if USER_AGENT is None:
+    raise ValueError("NS_USER_AGENT environment variable not set")
 
 POSTGRES_DB = os.getenv("POSTGRES_DB")
 POSTGRES_USER = os.getenv("POSTGRES_USER")
@@ -49,51 +51,24 @@ def to_snake_case(s: str) -> str:
 
 def main():
     initial_time = time.time()
-
-    #### DOWNLOAD DUMP ####
-    start_time = time.time()
-    logger.info("Downloading dump...")
-
-    response = requests.get(DATA_URL, headers={"User-Agent": USER_AGENT}, stream=True)
-    response.raise_for_status()
-
-    with open("nations_temp.xml.gz", "wb") as f:
-        for chunk in response.iter_content(chunk_size=8192):
-            f.write(chunk)
-
-    logger.info(f"Dump download complete. ({time.time() - start_time:.2f}s)")
+    sans.set_agent(USER_AGENT)
 
     #### EXTRACT AND PARSE DUMP ####
     start_time = time.time()
     logger.info("Parsing dump...")
 
-    dump_time = datetime.now(timezone.utc).replace(hour=5, minute=30, second=0, microsecond=0)
+    dump_time = datetime.now(timezone.utc).replace(
+        hour=5, minute=30, second=0, microsecond=0
+    )
+
     nations: list[dict[str, str | bool | list[str] | datetime]] = []
-    with gzip.open("nations_temp.xml.gz", "rt", encoding="utf-8") as f:
-        context = ET.iterparse(f, events=("start", "end"))
-        context = iter(context)
-        event, root = next(context)
+    with sans.stream("GET", sans.NationsDump()) as response:
+        for nation in response.iter_xml():
+            sans.indent(nation)
 
-        current_nation = {}
-
-        for event, elem in context:
-            if event == "end":
-                if elem.tag == "NATION":
-                    nations.append(
-                        {
-                            "name": to_snake_case(current_nation["name"]),
-                            "fullname": current_nation["fullname"],
-                            "region": to_snake_case(current_nation["region"]),
-                            "wa_member": current_nation["wa_member"],
-                            "endorsements": current_nation["endorsements"],
-                            "flag": current_nation["flag"],
-                            "timestamp": dump_time,
-                        }
-                    )
-                    current_nation = {}
-                    elem.clear()
-
-                elif elem.tag in [
+            current_nation = {}
+            for child in nation:
+                if child.tag in [
                     "NAME",
                     "FULLNAME",
                     "UNSTATUS",
@@ -101,8 +76,8 @@ def main():
                     "REGION",
                     "FLAG",
                 ]:
-                    if elem.tag == "UNSTATUS":
-                        match elem.text:
+                    if child.tag == "UNSTATUS":
+                        match child.text:
                             case "WA Delegate":
                                 current_nation["wa_delegate"] = True
                                 current_nation["wa_member"] = True
@@ -111,22 +86,30 @@ def main():
                             case _:
                                 current_nation["wa_delegate"] = False
                                 current_nation["wa_member"] = False
-                    elif elem.tag == "ENDORSEMENTS":
+                    elif child.tag == "ENDORSEMENTS":
                         current_nation["endorsements"] = (
-                            list(map(to_snake_case, elem.text.split(",")))
-                            if elem.text
+                            list(map(to_snake_case, child.text.split(",")))
+                            if child.text
                             else []
                         )
                     else:
-                        current_nation[elem.tag.lower()] = (
-                            elem.text if elem.text else ""
+                        current_nation[child.tag.lower()] = (
+                            child.text if child.text else ""
                         )
 
-        root.clear()
-    logger.info(f"Parsed {len(nations)} nations. ({time.time() - start_time:.2f}s)")
+            nations.append(
+                {
+                    "name": to_snake_case(current_nation["name"]),
+                    "fullname": current_nation["fullname"],
+                    "region": to_snake_case(current_nation["region"]),
+                    "wa_member": current_nation["wa_member"],
+                    "endorsements": current_nation["endorsements"],
+                    "flag": current_nation["flag"],
+                    "timestamp": dump_time,
+                }
+            )
 
-    # Clean up temp file
-    os.remove("nations_temp.xml.gz")
+    logger.info(f"Parsed {len(nations)} nations. ({time.time() - start_time:.2f}s)")
 
     #### UPDATE DATABASE ####
     logger.info("Updating database...")
