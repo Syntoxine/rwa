@@ -1,7 +1,10 @@
+import io
 import logging
 import logging.handlers
 import os
+from datetime import datetime, timedelta, timezone
 
+import aiohttp
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -25,6 +28,19 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
+def get_time_until_next_update() -> str:
+    now = datetime.now(timezone.utc)
+    update_time = now.replace(hour=5, minute=30, second=0, microsecond=0)
+    if now >= update_time:
+        update_time += timedelta(days=1)
+    delta = update_time - now
+    hours, remainder = divmod(int(delta.total_seconds()), 3600)
+    minutes, _ = divmod(remainder, 60)
+    if hours > 0:
+        return f"{hours}h"
+    return f"{minutes}m"
+
+
 def to_snake_case(name: str) -> str:
     return name.lower().replace(" ", "_")
 
@@ -33,11 +49,11 @@ def to_title_case(name: str) -> str:
     return name.title().replace("_", " ")
 
 
-def get_md_nation_link(name: str, suffix: str) -> str:
+def get_md_nation_link(name: str, suffix: str = "") -> str:
     return f"[{to_title_case(name)}](https://nationstates.net/nation={to_snake_case(name)}{suffix})"
 
 
-def get_md_region_link(name: str, suffix: str) -> str:
+def get_md_region_link(name: str, suffix: str = "") -> str:
     return f"[{to_title_case(name)}](https://nationstates.net/region={to_snake_case(name)}{suffix})"
 
 
@@ -81,32 +97,38 @@ async def tart(interaction: discord.Interaction, nation: str):
     """Use this command to get a list of nations your nation can endorse in your region."""
     callback_response = await interaction.response.defer()
     if callback_response is not None:
-        interaction_message: InteractionMessage = callback_response.resource # type: ignore
+        interaction_message: InteractionMessage = callback_response.resource  # type: ignore
     else:
         return
-    
+
     nation = to_snake_case(nation)
+    if not db.nation_exists(nation):
+        await interaction_message.edit(
+            content=f"No nation by the name {to_title_case(nation)} exists!"
+        )
+        return
+
     if not db.get_wa_status(nation):
         await interaction_message.edit(
             content=f"{to_title_case(nation)} is not a WA member, and can't endorse anyone!"
         )
         return
-    
+
     endorsable_nations = db.get_endorsable_nations(nation)
     if not endorsable_nations:
         await interaction_message.edit(
             content=f"{to_title_case(nation)} has endorsed everyone it could in its region!"
         )
     else:
-        nations = [f"{get_md_nation_link(n, '#composebutton')}" for n in endorsable_nations]
+        nations = [
+            f"{get_md_nation_link(n, '#composebutton')}" for n in endorsable_nations
+        ]
         prefix = f"{to_title_case(nation)} has not endorsed the following nations:"
         if len(nations) > 16:
             content = f"{prefix} {', '.join(nations[:16])}, and {len(nations) - 16} more nations ommitted for brevity."
         else:
             content = f"{prefix} {', '.join(nations)}."
-        await interaction_message.edit(
-            content=content
-        )
+        await interaction_message.edit(content=content)
 
 
 arwa.run(DISCORD_TOKEN)

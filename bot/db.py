@@ -18,6 +18,33 @@ DB_CONFIG = {
 }
 
 
+def nation_exists(nation: str) -> str:
+    with psycopg.connect(**DB_CONFIG) as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT name FROM nations WHERE (name = %s)", (nation,))
+            if row := cur.fetchone():
+                return row[0]
+            else:
+                return ""
+
+
+def search_nation(nation: str) -> dict[str, bool | list[str]]:
+    """Search for a nation by name. If no exact match is found, return the three closest matches."""
+    if name := nation_exists(nation):
+        return {"exact_match": True, "names": [name]}
+    else:
+        with psycopg.connect(**DB_CONFIG) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """SELECT name FROM nations
+                            ORDER BY levenshtein(name, %(nation)s)
+                            LIMIT 3""",
+                    {"nation": nation},
+                )
+                names = [row[0] for row in cur.fetchall()]
+        return {"exact_match": False, "names": names}
+
+
 def get_region(nation: str) -> str | None:
     with psycopg.connect(**DB_CONFIG) as conn:
         with conn.cursor() as cur:
@@ -36,6 +63,7 @@ def get_wa_status(nation: str) -> bool:
             if wa_member is not None:
                 return wa_member[0]
     return False
+
 
 def get_endorsements(nation: str) -> list[str]:
     with psycopg.connect(**DB_CONFIG) as conn:
@@ -59,3 +87,13 @@ def get_endorsable_nations(nation: str) -> list[str]:
                 (nation, get_region(nation), nation),
             )
             return [row[0] for row in cur.fetchall()]
+
+
+def get_flag(nation: str) -> str | None:
+    with psycopg.connect(**DB_CONFIG) as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT flag FROM nations WHERE (name = %s)", (nation,))
+            flag = cur.fetchone()
+            if flag is not None:
+                return flag[0]
+    return None

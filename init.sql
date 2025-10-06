@@ -1,4 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS moddatetime;
+CREATE EXTENSION IF NOT EXISTS fuzzystrmatch;
 
 create table nations (
   name text not null,
