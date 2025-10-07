@@ -11,7 +11,7 @@ fmt = "[{asctime}] [{levelname:<8}] {name} - {message}"
 dt_fmt = "%Y-%m-%d %H:%M:%S"
 logging.basicConfig(format=fmt, datefmt=dt_fmt, style="{", level=logging.INFO)
 logging.getLogger("httpx").setLevel(logging.WARNING)
-logging.getLogger("sse_consumer").setLevel(logging.WARNING)
+logging.getLogger("consumer").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 handler = logging.handlers.RotatingFileHandler(
