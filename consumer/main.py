@@ -1,12 +1,11 @@
 import asyncio
 import logging
 import logging.handlers
-import os
 
 import db
 from ns_event import NSEvent, EventType
 from channels import Channel, get_channels
-from sse_consumer import consume
+from consumer import consume
 
 fmt = "[{asctime}] [{levelname:<8}] {name} - {message}"
 dt_fmt = "%Y-%m-%d %H:%M:%S"
