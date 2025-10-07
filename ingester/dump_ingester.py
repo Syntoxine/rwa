@@ -51,7 +51,7 @@ def to_snake_case(s: str) -> str:
 
 def main():
     initial_time = time.time()
-    sans.set_agent(USER_AGENT)
+    sans.set_agent(USER_AGENT) # type: ignore
 
     #### EXTRACT AND PARSE DUMP ####
     start_time = time.time()
@@ -68,15 +68,8 @@ def main():
 
             current_nation = {}
             for child in nation:
-                if child.tag in [
-                    "NAME",
-                    "FULLNAME",
-                    "UNSTATUS",
-                    "ENDORSEMENTS",
-                    "REGION",
-                    "FLAG",
-                ]:
-                    if child.tag == "UNSTATUS":
+                match child.tag:
+                    case "UNSTATUS":
                         match child.text:
                             case "WA Delegate":
                                 current_nation["wa_delegate"] = True
@@ -86,13 +79,13 @@ def main():
                             case _:
                                 current_nation["wa_delegate"] = False
                                 current_nation["wa_member"] = False
-                    elif child.tag == "ENDORSEMENTS":
+                    case "ENDORSEMENTS":
                         current_nation["endorsements"] = (
                             list(map(to_snake_case, child.text.split(",")))
                             if child.text
                             else []
                         )
-                    else:
+                    case "NAME" | "FULLNAME" | "REGION" | "FLAG":
                         current_nation[child.tag.lower()] = (
                             child.text if child.text else ""
                         )
