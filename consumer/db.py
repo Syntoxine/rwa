@@ -44,7 +44,7 @@ def event_update(event: NSEvent) -> None:
             upsert_sql = """INSERT INTO nations (name, region, active)
             VALUES (%s, %s, TRUE)
             ON CONFLICT (name) DO UPDATE SET
-            ( region, active ) = (EXCLUDED.region, TRUE);"""
+            ( region, wa_member, active ) = (EXCLUDED.region, FALSE, TRUE);"""
             with psycopg.connect(**DB_CONFIG) as conn:
                 with conn.cursor() as cur:
                     cur.execute(
