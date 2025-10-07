@@ -10,8 +10,10 @@ from ns_event import NSEvent
 logger = logging.getLogger(__name__)
 
 USER_AGENT = os.getenv("NS_USER_AGENT")
+if USER_AGENT is None:
+    raise ValueError("NS_USER_AGENT environment variable not set")
 
-
+sans.set_agent(USER_AGENT)
 def consume() -> Generator[NSEvent]:
 
     for event in sans.serversent_events(None, "move", "founding", "cte", "member", "endo"):
