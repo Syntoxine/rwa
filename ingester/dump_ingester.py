@@ -1,10 +1,8 @@
-import gzip
 import logging
 import logging.handlers
 import os
 import time
 from datetime import datetime, timezone
-import xml.etree.ElementTree as ET
 
 import sans
 import psycopg
@@ -25,7 +23,7 @@ handler = logging.handlers.RotatingFileHandler(
 dt_fmt = "%Y-%m-%d %H:%M:%S"
 formatter = logging.Formatter(fmt, dt_fmt, style="{")
 handler.setFormatter(formatter)
-logger.addHandler(handler)
+logging.getLogger().addHandler(handler)
 
 USER_AGENT = os.getenv("NS_USER_AGENT")
 
