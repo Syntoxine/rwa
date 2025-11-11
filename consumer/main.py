@@ -1,4 +1,5 @@
 import asyncio
+import atexit
 import logging
 import logging.handlers
 
@@ -58,6 +59,7 @@ async def main():
         for channel in filter(lambda c: c.match(event), channels):
             await channel.send(str(event))
 
+atexit.register(lambda: logger.info("Consumer exiting..."))
 
 if __name__ == "__main__":
     asyncio.run(main())
