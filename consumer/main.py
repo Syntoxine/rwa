@@ -24,6 +24,7 @@ handler = logging.handlers.RotatingFileHandler(
 formatter = logging.Formatter(fmt, dt_fmt, style="{")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
+logging.getLogger().addHandler(handler)
 
 channels = get_channels()
 logger.info(
