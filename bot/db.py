@@ -79,12 +79,27 @@ def get_endorsable_nations(nation: str) -> list[str]:
     with psycopg.connect(**DB_CONFIG) as conn:
         with conn.cursor() as cur:
             cur.execute(
-                """SELECT name FROM nations
-                WHERE name != %s
-                AND region = %s
-                AND wa_member = TRUE
-                AND %s != ALL(endorsements)""",
-                (nation, get_region(nation), nation),
+                """SELECT n2.name FROM nations n1
+                JOIN nations n2 ON n1.name <> n2.name
+                WHERE n1.name = %(nation)s
+                AND n2.region = n1.region
+                AND n2.wa_member
+                AND n1.name <> ALL(n2.endorsements)""",
+                {"nation": nation},
+            )
+            return [row[0] for row in cur.fetchall()]
+        
+def get_non_endorsing_nations(nation: str) -> list[str]:
+    with psycopg.connect(**DB_CONFIG) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """SELECT n2.name FROM nations n1
+                JOIN nations n2 ON n1.name <> n2.name
+                WHERE n1.name = %(nation)s
+                AND n2.region = n1.region
+                AND n2.wa_member
+                AND n2.name <> ALL(n1.endorsements)""",
+                {"nation": nation},
             )
             return [row[0] for row in cur.fetchall()]
 
